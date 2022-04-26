@@ -68,7 +68,7 @@ jenkinsBuildByIdW = (msg) ->
     msg.reply "I couldn't find that job. Try `jenkins list` to get a list."
 
 jenkinsBuildW = (msg, buildWithEmptyParameters) ->
-   jenkinsGetCSRFCrumb(msg, jenkinsBuild, buildWithEmptyParameters)
+   jenkinsGetCSRFCrumb({msg, jenkinsBuild, buildWithEmptyParameters})
 
 jenkinsBuild = (msg, buildWithEmptyParameters, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
@@ -100,7 +100,7 @@ jenkinsBuild = (msg, buildWithEmptyParameters, crumb) ->
           msg.reply "Jenkins says: Status #{res.statusCode} #{body}"
 
 jenkinsDescribeW = (msg) -> 
-    jenkinsGetCSRFCrumb(msg, jenkinsDescribe)
+    jenkinsGetCSRFCrumb({msg, jenkinsDescribe})
 
 jenkinsDescribe = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
@@ -183,9 +183,9 @@ jenkinsDescribe = (msg, crumb) ->
             msg.send error
 
 jenkinsLastW = (msg) -> 
-    jenkinsGetCSRFCrumb(msg, jenkinsLast)
+    jenkinsGetCSRFCrumb({msg, jenkinsLast})
 
-jenkinsLast = (msg) ->
+jenkinsLast = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
     job = msg.match[1]
 
@@ -198,7 +198,6 @@ jenkinsLast = (msg) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
-    crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb.crumb)    
     req.get() (err, res, body) ->
         if err
@@ -218,9 +217,9 @@ jenkinsLast = (msg) ->
             msg.send response
 
 jenkinsListW = (msg) -> 
-    jenkinsGetCSRFCrumb(msg, jenkinsList)
+    jenkinsGetCSRFCrumb({msg, jenkinsList})
 
-jenkinsList = (msg) ->
+jenkinsList = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
     filter = new RegExp(msg.match[2], 'i')
     req = msg.http("#{url}/api/json")
@@ -229,7 +228,6 @@ jenkinsList = (msg) ->
       auth = new Buffer(process.env.HUBOT_JENKINS_AUTH).toString('base64')
       req.headers Authorization: "Basic #{auth}"
 
-    crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb.crumb)
     req.get() (err, res, body) ->
         response = ""
