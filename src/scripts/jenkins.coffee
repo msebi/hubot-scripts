@@ -89,7 +89,7 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
         else if 404 == res.statusCode
           msg.reply "Build not found, double check that it exists and is spelt correctly."
         else
-          msg.reply "Jenkins says: Status #{res.statusCode} #{body}"
+          msg.reply "Jenkins says: Status #{res.statusCode} #{body} \n Crumb: #{crumb}"
 
 jenkinsDescribe = (msg) ->
     url = process.env.HUBOT_JENKINS_URL
