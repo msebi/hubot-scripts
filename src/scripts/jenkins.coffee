@@ -52,7 +52,7 @@ jenkinsGetCSRFCrumb = (msg) ->
       catch error 
         msg.send error 
     msg.send "Jenkins CSRF crumb: #{crumb.crumb}"
-    return (crumb)
+    return ("crumb" : crumb.crumb)
 
 jenkinsBuildById = (msg) ->
   # Switch the index with the job name
