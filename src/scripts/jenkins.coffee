@@ -29,7 +29,7 @@ querystring = require 'querystring'
 # list.
 jobList = []
 
-jenkinsGetCSRFCrumb = (msg) ->
+jenkinsGetCSRFCrumb = ({msg, callback, buildWithEmptyParameters = undefined}) ->
   url = process.env.HUBOT_JENKINS_URL
   path = "#{url}/crumbIssuer/api/json"
   req = msg.http(path)
@@ -50,21 +50,27 @@ jenkinsGetCSRFCrumb = (msg) ->
         crumb = content
         msg.send "Jenkins CSRF crumb response: #{JSON.stringify(content)}"
         msg.send "Jenkins CSRF crumb: #{crumb.crumb}"
+        if (buildWithEmptyParameters)
+          callback(msg, buildWithEmptyParameters, crumb)
+        else 
+          callback(msg, crumb)
       catch error 
         msg.send error 
-   return crumb
 
-jenkinsBuildById = (msg) ->
+jenkinsBuildByIdW = (msg) ->
   # Switch the index with the job name
   job = jobList[parseInt(msg.match[1]) - 1]
 
   if job
     msg.match[1] = job
-    jenkinsBuild(msg)
+    jenkinsBuildW(msg)
   else
     msg.reply "I couldn't find that job. Try `jenkins list` to get a list."
 
-jenkinsBuild = (msg, buildWithEmptyParameters) ->
+jenkinsBuildW = (msg, buildWithEmptyParameters) ->
+   jenkinsGetCSRFCrumb(msg, jenkinsBuild, buildWithEmptyParameters)
+
+jenkinsBuild = (msg, buildWithEmptyParameters, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
     job = querystring.escape msg.match[1]
     params = msg.match[3]
@@ -77,11 +83,10 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
       auth = new Buffer(process.env.HUBOT_JENKINS_AUTH).toString('base64')
       req.headers Authorization: "Basic #{auth}"
 
-    req.header('Content-Length', 0)
-    crumb = jenkinsGetCSRFCrumb(msg)
+    req.header('Content-Length', 0)    
+    msg.reply "Crumb: #{crumb.crumb}"
+    msg.reply "Crumb response: #{JSON.stringify(crumb)}"
     req.header('Jenkins-Crumb', crumb.crumb)
-    msg.reply "Got crumb: #{crumb.crumb}"
-    msg.reply "Got crumb: #{JSON.stringify(crumb)}"
     req.post() (err, res, body) ->
         if err
           msg.reply "Jenkins says: #{err}"
@@ -94,7 +99,10 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
         else
           msg.reply "Jenkins says: Status #{res.statusCode} #{body}"
 
-jenkinsDescribe = (msg) ->
+jenkinsDescribeW = (msg) -> 
+    jenkinsGetCSRFCrumb(msg, jenkinsDescribe)
+
+jenkinsDescribe = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
     job = msg.match[1]
 
@@ -107,7 +115,6 @@ jenkinsDescribe = (msg) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
-    crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb.crumb)
     req.get() (err, res, body) ->
         if err
@@ -175,6 +182,9 @@ jenkinsDescribe = (msg) ->
           catch error
             msg.send error
 
+jenkinsLastW = (msg) -> 
+    jenkinsGetCSRFCrumb(msg, jenkinsLast)
+
 jenkinsLast = (msg) ->
     url = process.env.HUBOT_JENKINS_URL
     job = msg.match[1]
@@ -206,6 +216,9 @@ jenkinsLast = (msg) ->
             response += "BUILDING: #{content.building}\n"
 
             msg.send response
+
+jenkinsListW = (msg) -> 
+    jenkinsGetCSRFCrumb(msg, jenkinsList)
 
 jenkinsList = (msg) ->
     url = process.env.HUBOT_JENKINS_URL
@@ -267,8 +280,8 @@ module.exports = (robot) ->
     jenkinsLast(msg)
 
   robot.jenkins = {
-    list: jenkinsList,
-    build: jenkinsBuild
-    describe: jenkinsDescribe
-    last: jenkinsLast
+    list: jenkinsListW,
+    build: jenkinsBuildW
+    describe: jenkinsDescribeW
+    last: jenkinsLastW
   }
