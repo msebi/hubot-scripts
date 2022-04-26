@@ -40,7 +40,7 @@ jenkinsGetCSRFCrumb = (msg) ->
 
   req.header('Content-Length', 0)
   crumb = ""
-  req.get(err, res, body) ->
+  req.get() (err, res, body) ->
     if err
       msg.send "Jenkins says: #{err}"
     else
