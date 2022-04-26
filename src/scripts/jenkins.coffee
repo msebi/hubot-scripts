@@ -271,19 +271,19 @@ jenkinsList = (msg, crumb) ->
 
 module.exports = (robot) ->
   robot.respond /j(?:enkins)? build ([\w\.\-_ ]+)(, (.+))?/i, (msg) ->
-    jenkinsBuild(msg, false)
+    jenkinsBuildW(msg, false)
 
   robot.respond /j(?:enkins)? b (\d+)/i, (msg) ->
-    jenkinsBuildById(msg)
+    jenkinsBuildByIdW(msg)
 
   robot.respond /j(?:enkins)? list( (.+))?/i, (msg) ->
-    jenkinsList(msg)
+    jenkinsListW(msg)
 
   robot.respond /j(?:enkins)? describe (.*)/i, (msg) ->
-    jenkinsDescribe(msg)
+    jenkinsDescribeW(msg)
 
   robot.respond /j(?:enkins)? last (.*)/i, (msg) ->
-    jenkinsLast(msg)
+    jenkinsLastW(msg)
 
   robot.jenkins = {
     list: jenkinsListW,
