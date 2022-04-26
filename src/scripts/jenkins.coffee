@@ -29,7 +29,7 @@ querystring = require 'querystring'
 # list.
 jobList = []
 
-jenkinsGetCSRFCrumb = (msg) =>
+jenkinsGetCSRFCrumb = (msg) ->
   url = process.env.HUBOT_JENKINS_URL
   path = "#{url}/crumbIssuer/api/json"
   req = msg.http(path)
@@ -48,11 +48,11 @@ jenkinsGetCSRFCrumb = (msg) =>
       try
         content = JSON.parse(body)
         msg.send "Jenkins CSRF crumb response: #{JSON.stringify(content)}"
-        crumb = content.crumb
+        crumb = content
       catch error 
         msg.send error 
-    msg.send "Jenkins CSRF crumb: #{crumb}"
-    return crumb
+    msg.send "Jenkins CSRF crumb: #{crumb.crumb}"
+    return (crumb)
 
 jenkinsBuildById = (msg) ->
   # Switch the index with the job name
@@ -80,7 +80,8 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
     req.header('Content-Length', 0)
     crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb)
-    msg.reply "Got crumb: #{crumb}"
+    msg.reply "Got crumb: #{crumb.crumb}"
+    msg.reply "Got crumb: #{JSON.stringify(crumb)}"
     req.post() (err, res, body) ->
         if err
           msg.reply "Jenkins says: #{err}"
