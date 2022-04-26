@@ -49,11 +49,11 @@ jenkinsGetCSRFCrumb = (msg) ->
       try
         content = JSON.parse(body)
         msg.send "Jenkins CSRF crumb response: #{JSON.stringify(content)}"
+        msg.send "Jenkins CSRF crumb: #{crumb.crumb}"
         crumb = content
       catch error 
         msg.send error 
-    msg.send "Jenkins CSRF crumb: #{crumb.crumb}"
-
+   
 
 jenkinsBuildById = (msg) ->
   # Switch the index with the job name
@@ -79,7 +79,7 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
-    jenkinsGetCSRFCrumb(msg)
+    await jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb.crumb)
     msg.reply "Got crumb: #{crumb.crumb}"
     msg.reply "Got crumb: #{JSON.stringify(crumb)}"
@@ -108,7 +108,7 @@ jenkinsDescribe = (msg) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
-    jenkinsGetCSRFCrumb(msg)
+    await jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb.crumb)
     req.get() (err, res, body) ->
         if err
@@ -189,7 +189,7 @@ jenkinsLast = (msg) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
-    jenkinsGetCSRFCrumb(msg)
+    await = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb.crumb)    
     req.get() (err, res, body) ->
         if err
@@ -217,7 +217,7 @@ jenkinsList = (msg) ->
       auth = new Buffer(process.env.HUBOT_JENKINS_AUTH).toString('base64')
       req.headers Authorization: "Basic #{auth}"
 
-    jenkinsGetCSRFCrumb(msg)
+    await jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb.crumb)
     req.get() (err, res, body) ->
         response = ""
