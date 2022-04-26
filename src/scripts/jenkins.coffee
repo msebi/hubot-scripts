@@ -79,6 +79,7 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
     req.header('Content-Length', 0)
     crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb)
+    crumb = JSON.stringify(crumb)
     req.post() (err, res, body) ->
         if err
           msg.reply "Jenkins says: #{err} \n Crumb: #{crumb}"
