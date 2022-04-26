@@ -29,6 +29,30 @@ querystring = require 'querystring'
 # list.
 jobList = []
 
+jenkinsGetCSRFCrumb = () ->
+  url = process.env.HUBOT_JENKINS_URL
+  path = "#{url}/crumbIssuer/api/json"
+  req = msg.http(path)
+
+  if process.env.HUBOT_JENKINS_AUTH
+    auth = new Buffer(process.env.HUBOT_JENKINS_AUTH).toString('base64')
+    req.headers Authorization: "Basic #{auth}"
+
+  req.header('Content-Length', 0)
+  crumb = ""
+  req.get(err, res, body) ->
+    if err
+      msg.send "Jenkins says: #{err}"
+    else
+      response = ""
+      try
+        content = JSON.parse(body)
+        msg.send "Jenkins CSRF crumb: #{content}"
+        crumb = content.crumb
+      catch error 
+        msg.send error 
+    return crumb
+
 jenkinsBuildById = (msg) ->
   # Switch the index with the job name
   job = jobList[parseInt(msg.match[1]) - 1]
@@ -53,6 +77,8 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
+    crumb = jenkinsGetCSRFCrumb()
+    req.header('Jenkins-Crumb', crumb)
     req.post() (err, res, body) ->
         if err
           msg.reply "Jenkins says: #{err}"
@@ -78,6 +104,8 @@ jenkinsDescribe = (msg) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
+    crumb = jenkinsGetCSRFCrumb()
+    req.header('Jenkins-Crumb', crumb)
     req.get() (err, res, body) ->
         if err
           msg.send "Jenkins says: #{err}"
@@ -157,6 +185,8 @@ jenkinsLast = (msg) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
+    crumb = jenkinsGetCSRFCrumb()
+    req.header('Jenkins-Crumb', crumb)    
     req.get() (err, res, body) ->
         if err
           msg.send "Jenkins says: #{err}"
@@ -183,6 +213,8 @@ jenkinsList = (msg) ->
       auth = new Buffer(process.env.HUBOT_JENKINS_AUTH).toString('base64')
       req.headers Authorization: "Basic #{auth}"
 
+    crumb = jenkinsGetCSRFCrumb()
+    req.header('Jenkins-Crumb', crumb)
     req.get() (err, res, body) ->
         response = ""
         if err
