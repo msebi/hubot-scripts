@@ -31,11 +31,12 @@ jobList = []
 
 jenkinsGetCSRFCrumb = (args...) ->
   msg = args[0]
-  console.log "msg: #{msg}"
   callback = args[1]
-  console.log "callback: #{callback}"
   buildWithEmptyParameters = args[2]
-  console.log "buildWithEmptyParameters: #{buildWithEmptyParameters}"
+
+  robot.logger.debug "msg #{msg}"
+  robot.logger.debug "callback #{callback}"
+  robot.logger.debug "buildWithEmptyParameters #{buildWithEmptyParameters}"
 
   url = process.env.HUBOT_JENKINS_URL
   path = "#{url}/crumbIssuer/api/json"
