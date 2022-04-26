@@ -29,54 +29,15 @@ querystring = require 'querystring'
 # list.
 jobList = []
 
-jenkinsGetCSRFCrumb = (args...) ->
-  msg = args[0]
-  callback = args[1]
-  buildWithEmptyParameters = args[2]
-
-  console.log "msg #{msg}"
-  console.log "callback #{callback}"
-  console.log "buildWithEmptyParameters #{buildWithEmptyParameters}"
-
-  url = process.env.HUBOT_JENKINS_URL
-  path = "#{url}/crumbIssuer/api/json"
-  req = msg.http(path)
-
-  if process.env.HUBOT_JENKINS_AUTH
-    auth = new Buffer(process.env.HUBOT_JENKINS_AUTH).toString('base64')
-    req.headers Authorization: "Basic #{auth}"
-
-  req.header('Content-Length', 0)
-  crumb = {}
-  req.get() (err, res, body) ->
-    if err
-      msg.send "Jenkins says getting crumb: #{err}"
-    else
-      response = ""
-      try
-        content = JSON.parse(body)
-        crumb = content
-        msg.send "Jenkins CSRF crumb response: #{JSON.stringify(content)}"
-        msg.send "Jenkins CSRF crumb: #{crumb.crumb}"
-        if (buildWithEmptyParameters)
-          callback(msg, buildWithEmptyParameters, crumb)
-        else 
-          callback(msg, crumb)
-      catch error 
-        msg.send error 
-
-jenkinsBuildByIdW = (msg) ->
+jenkinsBuildById = (msg) ->
   # Switch the index with the job name
   job = jobList[parseInt(msg.match[1]) - 1]
 
   if job
     msg.match[1] = job
-    jenkinsBuildW(msg)
+    jenkinsBuild(msg)
   else
     msg.reply "I couldn't find that job. Try `jenkins list` to get a list."
-
-jenkinsBuildW = (msg, buildWithEmptyParameters) ->
-   jenkinsGetCSRFCrumb(msg, jenkinsBuild, buildWithEmptyParameters)
 
 jenkinsBuild = (msg, buildWithEmptyParameters, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
@@ -106,9 +67,6 @@ jenkinsBuild = (msg, buildWithEmptyParameters, crumb) ->
           msg.reply "Build not found, double check that it exists and is spelt correctly."
         else
           msg.reply "Jenkins says: Status #{res.statusCode} #{body}"
-
-jenkinsDescribeW = (msg) -> 
-    jenkinsGetCSRFCrumb(msg, jenkinsDescribe, undefined)
 
 jenkinsDescribe = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
@@ -190,9 +148,6 @@ jenkinsDescribe = (msg, crumb) ->
           catch error
             msg.send error
 
-jenkinsLastW = (msg) -> 
-    jenkinsGetCSRFCrumb(msg, jenkinsLast, undefined)
-
 jenkinsLast = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
     job = msg.match[1]
@@ -223,9 +178,6 @@ jenkinsLast = (msg, crumb) ->
             response += "BUILDING: #{content.building}\n"
 
             msg.send response
-
-jenkinsListW = (msg) -> 
-    jenkinsGetCSRFCrumb(msg, jenkinsList, undefined)
 
 jenkinsList = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
