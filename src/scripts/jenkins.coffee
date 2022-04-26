@@ -80,10 +80,10 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
     req.header('Content-Length', 0)
     crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb)
-    crumb = JSON.stringify(crumb)
+    msg.reply "Got crumb: #{crumb}"
     req.post() (err, res, body) ->
         if err
-          msg.reply "Jenkins says: #{err} \n Crumb: #{crumb}"
+          msg.reply "Jenkins says: #{err}"
         else if 200 <= res.statusCode < 400 # Or, not an error code.
           msg.reply "(#{res.statusCode}) Build started for #{job} #{url}/job/#{job}"
         else if 400 == res.statusCode
@@ -91,7 +91,7 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
         else if 404 == res.statusCode
           msg.reply "Build not found, double check that it exists and is spelt correctly."
         else
-          msg.reply "Jenkins says: Status #{res.statusCode} #{body} \n Crumb: #{crumb}"
+          msg.reply "Jenkins says: Status #{res.statusCode} #{body}"
 
 jenkinsDescribe = (msg) ->
     url = process.env.HUBOT_JENKINS_URL
