@@ -34,9 +34,9 @@ jenkinsGetCSRFCrumb = (args...) ->
   callback = args[1]
   buildWithEmptyParameters = args[2]
 
-  robot.logger.debug "msg #{msg}"
-  robot.logger.debug "callback #{callback}"
-  robot.logger.debug "buildWithEmptyParameters #{buildWithEmptyParameters}"
+  console.log "msg #{msg}"
+  console.log "callback #{callback}"
+  console.log "buildWithEmptyParameters #{buildWithEmptyParameters}"
 
   url = process.env.HUBOT_JENKINS_URL
   path = "#{url}/crumbIssuer/api/json"
