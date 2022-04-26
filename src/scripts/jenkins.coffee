@@ -29,7 +29,7 @@ querystring = require 'querystring'
 # list.
 jobList = []
 
-jenkinsGetCSRFCrumb = () ->
+jenkinsGetCSRFCrumb = (msg) ->
   url = process.env.HUBOT_JENKINS_URL
   path = "#{url}/crumbIssuer/api/json"
   req = msg.http(path)
@@ -77,7 +77,7 @@ jenkinsBuild = (msg, buildWithEmptyParameters) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
-    crumb = jenkinsGetCSRFCrumb()
+    crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb)
     req.post() (err, res, body) ->
         if err
@@ -104,7 +104,7 @@ jenkinsDescribe = (msg) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
-    crumb = jenkinsGetCSRFCrumb()
+    crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb)
     req.get() (err, res, body) ->
         if err
@@ -185,7 +185,7 @@ jenkinsLast = (msg) ->
       req.headers Authorization: "Basic #{auth}"
 
     req.header('Content-Length', 0)
-    crumb = jenkinsGetCSRFCrumb()
+    crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb)    
     req.get() (err, res, body) ->
         if err
@@ -213,7 +213,7 @@ jenkinsList = (msg) ->
       auth = new Buffer(process.env.HUBOT_JENKINS_AUTH).toString('base64')
       req.headers Authorization: "Basic #{auth}"
 
-    crumb = jenkinsGetCSRFCrumb()
+    crumb = jenkinsGetCSRFCrumb(msg)
     req.header('Jenkins-Crumb', crumb)
     req.get() (err, res, body) ->
         response = ""
