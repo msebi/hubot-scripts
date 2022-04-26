@@ -29,7 +29,10 @@ querystring = require 'querystring'
 # list.
 jobList = []
 
-jenkinsGetCSRFCrumb = ({msg, callback, buildWithEmptyParameters = undefined}) ->
+jenkinsGetCSRFCrumb = (args...) ->
+  msg = args[0]
+  callback = args[1]
+  buildWithEmptyParameters = args[2]
   url = process.env.HUBOT_JENKINS_URL
   path = "#{url}/crumbIssuer/api/json"
   req = msg.http(path)
@@ -68,7 +71,7 @@ jenkinsBuildByIdW = (msg) ->
     msg.reply "I couldn't find that job. Try `jenkins list` to get a list."
 
 jenkinsBuildW = (msg, buildWithEmptyParameters) ->
-   jenkinsGetCSRFCrumb({msg, jenkinsBuild, buildWithEmptyParameters})
+   jenkinsGetCSRFCrumb(msg, jenkinsBuild, buildWithEmptyParameters)
 
 jenkinsBuild = (msg, buildWithEmptyParameters, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
@@ -100,7 +103,7 @@ jenkinsBuild = (msg, buildWithEmptyParameters, crumb) ->
           msg.reply "Jenkins says: Status #{res.statusCode} #{body}"
 
 jenkinsDescribeW = (msg) -> 
-    jenkinsGetCSRFCrumb({msg, jenkinsDescribe})
+    jenkinsGetCSRFCrumb(msg, jenkinsDescribe, undefined)
 
 jenkinsDescribe = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
@@ -183,7 +186,7 @@ jenkinsDescribe = (msg, crumb) ->
             msg.send error
 
 jenkinsLastW = (msg) -> 
-    jenkinsGetCSRFCrumb({msg, jenkinsLast})
+    jenkinsGetCSRFCrumb(msg, jenkinsLast, undefined)
 
 jenkinsLast = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
@@ -217,7 +220,7 @@ jenkinsLast = (msg, crumb) ->
             msg.send response
 
 jenkinsListW = (msg) -> 
-    jenkinsGetCSRFCrumb({msg, jenkinsList})
+    jenkinsGetCSRFCrumb(msg, jenkinsList, undefined)
 
 jenkinsList = (msg, crumb) ->
     url = process.env.HUBOT_JENKINS_URL
