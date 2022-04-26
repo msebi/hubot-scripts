@@ -31,8 +31,12 @@ jobList = []
 
 jenkinsGetCSRFCrumb = (args...) ->
   msg = args[0]
+  console.log "msg: #{msg}"
   callback = args[1]
+  console.log "callback: #{callback}"
   buildWithEmptyParameters = args[2]
+  console.log "buildWithEmptyParameters: #{buildWithEmptyParameters}"
+
   url = process.env.HUBOT_JENKINS_URL
   path = "#{url}/crumbIssuer/api/json"
   req = msg.http(path)
