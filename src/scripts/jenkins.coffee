@@ -42,12 +42,12 @@ jenkinsGetCSRFCrumb = (msg) ->
   crumb = ""
   req.get() (err, res, body) ->
     if err
-      msg.send "Jenkins says: #{err}"
+      msg.send "Jenkins says getting crumb: #{err}"
     else
       response = ""
       try
         content = JSON.parse(body)
-        msg.send "Jenkins CSRF crumb: #{content}"
+        msg.send "Jenkins CSRF crumb: #{JSON.stringify(content)}"
         crumb = content.crumb
       catch error 
         msg.send error 
